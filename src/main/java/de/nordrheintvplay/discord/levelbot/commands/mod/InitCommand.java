@@ -88,7 +88,7 @@ public class InitCommand extends ListenerAdapter implements Commands {
 
                 if (member.getUser().isBot()) continue;
 
-                Users.addMember(member.getUser().getId());
+                Users.addUser(member.getUser().getIdLong());
 
             }
 

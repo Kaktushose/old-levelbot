@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -28,11 +29,20 @@ public class RemoveCoins implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
+        User user = Users.getUser(member.getUser().getIdLong());
 
-        Users.setCoins(memberId, Users.getCoins(memberId) - Integer.valueOf(args[1]));
+        int coins;
 
-        event.getMessage().getChannel().sendMessage("`Coins von " + member.getEffectiveName() + " erfolgreich auf " + Users.getCoins(memberId) + " Münzen reduziert`").queue();
+        try {
+            coins = Integer.valueOf(args[1]);
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("`" + args[1] + " ist keine gültige Zahl`").queue();
+            return;
+        }
+
+        user.setCoins(user.getCoins() - coins).save();
+
+        event.getMessage().getChannel().sendMessage("`Coins von " + member.getEffectiveName() + " erfolgreich auf " + user.getCoins() + " Münzen reduziert`").queue();
 
     }
 

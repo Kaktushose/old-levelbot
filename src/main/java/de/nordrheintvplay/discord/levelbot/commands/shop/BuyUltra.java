@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.shop;
 
 import de.nordrheintvplay.discord.levelbot.json.Prices;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.LevelUtils;
 import net.dv8tion.jda.core.entities.Message;
@@ -12,25 +13,25 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 public class BuyUltra extends ListenerAdapter {
 
     private static long msgId;
-    private static String userId;
+    private static User user;
     private static int price;
 
 
     public static void execute(GuildMessageReceivedEvent event) {
 
         price = Prices.getPrice("ultra") + Prices.getPrice("premium");
-        userId = event.getAuthor().getId();
+        user = Users.getUser(event.getAuthor().getIdLong());
 
-        if (Users.hasUltra(userId)) {
+        if (user.getUltra()) {
             event.getChannel().sendMessage("`Du besitzt bereits die ULTRA-Rolle!`").queue();
             return;
         }
 
-        if (Users.hasPremium(userId)) {
+        if (user.getPremium()) {
             price = Prices.getPrice("ultra");
         }
 
-        if (Users.getCoins(event.getAuthor().getId()) < price) {
+        if (user.getCoins() < price) {
             event.getChannel().sendMessage("`Du hast nicht genug Münzen, um dir die ULTRA-Rolle zu leisten!`").queue();
             return;
         }
@@ -54,7 +55,7 @@ public class BuyUltra extends ListenerAdapter {
             return;
         }
 
-        if (!event.getMember().getUser().getId().equals(userId)) {
+        if (event.getMember().getUser().getIdLong()!= user.getId()) {
             return;
         }
 
@@ -75,13 +76,13 @@ public class BuyUltra extends ListenerAdapter {
             event.getChannel().deleteMessageById(event.getMessageIdLong()).queue();
             event.getChannel().sendMessage("`Du hast die ULTRA-Rolle gekauft!`").queue();
 
-            Users.setCoins(userId, Users.getCoins(userId) - price);
-            Users.setUltra(userId, true);
+            user.setCoins(user.getCoins() - price);
+            user.setUltra(true);
 
             LevelUtils.removeRole(event.getMember(), LevelUtils.Roles.PREMIUM);
             LevelUtils.addRole(event.getMember(), LevelUtils.Roles.ULTRA);
 
-
+            user.save();
         }
 
     }

@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.shop;
 
 import de.nordrheintvplay.discord.levelbot.json.Prices;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.LevelUtils;
 import net.dv8tion.jda.core.entities.Message;
@@ -11,17 +12,17 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 public class BuyPremium extends ListenerAdapter {
 
     private static long msgId;
-    private static String userId;
+    private static User user;
     public static void execute(GuildMessageReceivedEvent event) {
 
-        userId = event.getAuthor().getId();
+        user = Users.getUser(event.getAuthor().getIdLong());
 
-        if (Users.hasPremium(userId)) {
+        if (user.getPremium()) {
             event.getChannel().sendMessage("`Du besitzt bereits die Premium-Rolle!`").queue();
             return;
         }
 
-        if (Users.getCoins(userId) < Prices.getPrice("premium")) {
+        if (user.getCoins() < Prices.getPrice("premium")) {
             event.getChannel().sendMessage("`Du hast nicht genug Münzen, um dir die Premium-Rolle zu leisten!`").queue();
             return;
         }
@@ -47,7 +48,7 @@ public class BuyPremium extends ListenerAdapter {
             return;
         }
 
-        if (!event.getMember().getUser().getId().equals(userId)) {
+        if (event.getMember().getUser().getIdLong() != user.getId()) {
             return;
         }
 
@@ -64,11 +65,12 @@ public class BuyPremium extends ListenerAdapter {
 
         if (event.getReactionEmote().getName().equals("\uD83D\uDC4D")) {
 
-            Users.setPremium(userId, true);
-            Users.setCoins(userId, Users.getCoins(userId) - Prices.getPrice("premium"));
+            user.setPremium(true);
+            user.setCoins(user.getCoins() - Prices.getPrice("premium"));
             event.getChannel().deleteMessageById(event.getMessageIdLong()).queue();
             event.getChannel().sendMessage("`Du hast die Premium-Rolle gekauft!`").queue();
             LevelUtils.addRole(event.getMember(), LevelUtils.Roles.PREMIUM);
+            user.save();
 
 
         }

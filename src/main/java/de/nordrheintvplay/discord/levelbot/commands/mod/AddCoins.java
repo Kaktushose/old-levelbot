@@ -1,7 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
-import de.nordrheintvplay.discord.levelbot.core.XpHandler;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -54,12 +54,14 @@ public class AddCoins implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
 
-        int oldCoins = Users.getCoins(memberId);
+        User user = Users.getUser(member.getUser().getIdLong());
+
+
+        int oldCoins = user.getCoins();
         int newCoins = oldCoins + coins;
 
-        Users.setCoins(memberId, newCoins);
+        user.setCoins(newCoins).save();
 
         event.getMessage().getChannel().sendMessage("`Erfolgreich Coins von " + member.getEffectiveName() + " auf " + newCoins + " gesetzt!`").queue();
     }

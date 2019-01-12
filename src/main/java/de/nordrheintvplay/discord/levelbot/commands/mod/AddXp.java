@@ -2,6 +2,7 @@ package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
 import de.nordrheintvplay.discord.levelbot.core.XpHandler;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -56,16 +57,17 @@ public class AddXp implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
 
-        int oldXp = Users.getXp(memberId);
+        User user = Users.getUser(member.getUser().getIdLong());
+
+        int oldXp = user.getXp();
         int newXp = oldXp + xp;
 
-        Users.setXp(memberId, newXp);
+        user.setXp(newXp).save();
 
         event.getMessage().getChannel().sendMessage("`Erfolgreich XP von " + member.getEffectiveName() + " auf " + newXp + " gesetzt!`").queue();
 
-        XpHandler.check(event, event.getMember().getUser().getId());
+        XpHandler.check(event, Users.getUser(event.getMember().getUser().getIdLong()));
 
     }
 

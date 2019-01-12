@@ -1,5 +1,6 @@
 package de.nordrheintvplay.discord.levelbot.core;
 
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Const;
 import net.dv8tion.jda.core.entities.Member;
@@ -19,13 +20,13 @@ public class XpTimer {
             public void run() {
                 for (Member member : getJda().getGuildById(Const.SERVER_ID).getMembers()) {
 
-                    String userId = member.getUser().getId();
+                    User user = Users.getUser(member.getUser().getIdLong());
 
-                    if (Users.getRole(userId) != 7) {
+                    if (user.getRole() != 7) {
                         return;
                     }
 
-                    Users.setCoins(userId, Users.getCoins(userId) + 30);
+                    user.setCoins(user.getCoins() + 30).save();
 
                 }
             }

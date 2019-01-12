@@ -9,7 +9,7 @@ public class JoinListener extends ListenerAdapter {
 
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         LevelUtils.addRole(event.getMember(), LevelUtils.Roles.WELCOME);
-        Users.addMember(event.getUser().getId());
+        Users.addUser(event.getUser().getIdLong());
     }
 
 }

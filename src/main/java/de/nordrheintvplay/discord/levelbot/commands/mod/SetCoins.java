@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -26,9 +27,18 @@ public class SetCoins implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
-        int coins = Integer.parseInt(args[1]);
-        Users.setCoins(memberId, coins);
+        User user  = Users.getUser(member.getUser().getIdLong());
+
+        int coins;
+
+        try {
+            coins = Integer.valueOf(args[1]);
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("`" + args[1] + " ist keine gültige Zahl`").queue();
+            return;
+        }
+
+        user.setCoins(coins).save();
 
         event.getMessage().getChannel().sendMessage("`Erfolgreich Coins von " + member.getEffectiveName() + " auf " + coins + " gesetzt!`").queue();
 
