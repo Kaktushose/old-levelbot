@@ -1,6 +1,8 @@
 package de.nordrheintvplay.discord.levelbot.json;
 
 import de.nordrheintvplay.discord.levelbot.utils.Const;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -8,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 
 public class Users {
@@ -17,6 +20,45 @@ public class Users {
 
     static {
         load();
+    }
+
+    public static void update(Guild guild) {
+
+        for (Member member : guild.getMembers()) {
+
+            Iterator<String> keys = json.keys();
+            boolean registered = false;
+
+            while(keys.hasNext()) {
+                String key = keys.next();
+                if (key.equals(member.getUser().getId())) {
+                    registered = true;
+                }
+            }
+
+            if (!registered) {
+                Users.addUser(member.getUser().getIdLong());
+            }
+
+        }
+
+        Iterator<String> keys = json.keys();
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+            boolean onServer = false;
+            for (Member member : guild.getMembers()) {
+                if (key.equals(member.getUser().getId())) {
+                    onServer = true;
+                }
+            }
+
+            if (!onServer) {
+                json.remove(key);
+            }
+
+        }
+
     }
 
     public static void addUser(long id) {

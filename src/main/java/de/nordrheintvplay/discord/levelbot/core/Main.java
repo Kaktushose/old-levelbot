@@ -10,7 +10,7 @@ public class Main {
         SimpleDateFormat date = new SimpleDateFormat("[dd.MM.yy HH:mm:ss]");
 
         System.out.println(date.format(new Date()) + "[SYSTEM] Bot wird gestartet...");
-        //LevelBot.start();
+        LevelBot.start();
         System.out.println(date.format(new Date()) + "[SYSTEM] Bot wurde gestartet");
 
     }

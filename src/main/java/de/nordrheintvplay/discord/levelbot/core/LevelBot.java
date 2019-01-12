@@ -9,6 +9,7 @@ import de.nordrheintvplay.discord.levelbot.commands.shop.BuyUltra;
 import de.nordrheintvplay.discord.levelbot.commands.shop.ShopHelpCommand;
 import de.nordrheintvplay.discord.levelbot.commands.util.CreditsCommand;
 import de.nordrheintvplay.discord.levelbot.commands.util.HelpCommand;
+import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.listeners.JoinListener;
 import de.nordrheintvplay.discord.levelbot.listeners.LeaveListener;
 import de.nordrheintvplay.discord.levelbot.utils.Const;
@@ -64,7 +65,7 @@ public class LevelBot {
             e.printStackTrace();
         }
 
-        //Users.check(jda.getGuildById(Const.SERVER_ID));
+        Users.update(jda.getGuildById(Const.SERVER_ID));
         XpTimer.run();
         BoosterCheck.check(jda.getGuildById(Const.SERVER_ID));
 
