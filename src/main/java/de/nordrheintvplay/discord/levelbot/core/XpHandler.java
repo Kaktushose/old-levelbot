@@ -114,8 +114,6 @@ public class XpHandler extends ListenerAdapter {
 
         Date date = new Date();
 
-        User user = Users.getUser(event.getAuthor().getIdLong()); 
-
         if (event.getChannel().getIdLong() == 408630688523485184L) { //Rollen-Reports-Tickets
             return;
         }
@@ -132,6 +130,8 @@ public class XpHandler extends ListenerAdapter {
             return;
         }
 
+        User user = Users.getUser(event.getAuthor().getIdLong());
+
         if (date.getTime() - user.getLastXp() < 600000L) {
             return;
         }
@@ -145,7 +145,7 @@ public class XpHandler extends ListenerAdapter {
 
         if (event.getMessage().getContentRaw().length() >= 10 || hasImage) {
 
-            user.setXp(user.getXp() + 5);
+            user.setXp(user.getXp() + 3);
 
             if (user.getBooster()) {
                 user.setCoins(user.getCoins() + LevelUtils.getCoinsByLevel(user.getRole()+ 2));

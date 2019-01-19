@@ -10,7 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class Users {
@@ -22,6 +24,22 @@ public class Users {
         load();
     }
 
+    public static void addKey() {
+
+        for (Iterator<String> it = json.keys(); it.hasNext(); ) {
+
+            String key = it.next();
+
+            JSONObject member = new JSONObject(json.get(key).toString());
+            member.put("", 0);
+            json.put(key, member);
+        }
+
+        save();
+
+    }
+
+
     public static void update(Guild guild) {
 
         for (Member member : guild.getMembers()) {
@@ -29,7 +47,7 @@ public class Users {
             Iterator<String> keys = json.keys();
             boolean registered = false;
 
-            while(keys.hasNext()) {
+            while (keys.hasNext()) {
                 String key = keys.next();
                 if (key.equals(member.getUser().getId())) {
                     registered = true;
@@ -43,6 +61,7 @@ public class Users {
         }
 
         Iterator<String> keys = json.keys();
+        List<String> valuesToRemove = new ArrayList<>();
 
         while (keys.hasNext()) {
             String key = keys.next();
@@ -54,11 +73,13 @@ public class Users {
             }
 
             if (!onServer) {
-                json.remove(key);
+                valuesToRemove.add(key);
             }
-
         }
 
+        for (String key : valuesToRemove) {
+            json.remove(key);
+        }
     }
 
     public static void addUser(long id) {
@@ -80,7 +101,7 @@ public class Users {
         return new User(member.getInt("role"),
                 member.getInt("xp"),
                 member.getInt("coins"),
-                member.getLong("id"),
+                id,
                 member.getLong("lastxp"),
                 member.getLong("boostertime"),
                 member.getBoolean("premium"),
