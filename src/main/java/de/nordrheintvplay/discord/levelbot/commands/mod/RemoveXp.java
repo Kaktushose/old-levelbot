@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -25,11 +26,22 @@ public class RemoveXp implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
 
-        Users.setXp(memberId, Users.getXp(memberId) - Integer.valueOf(args[1]));
+        User user = Users.getUser(member.getUser().getIdLong());
 
-        event.getMessage().getChannel().sendMessage("`XP von " + member.getEffectiveName() + " erfolgreich auf " + Users.getCoins(memberId) + " XP reduziert`").queue();
+        int xp;
+
+        try {
+            xp = Integer.valueOf(args[1]);
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("`" + args[1] + " ist keine gültige Zahl`").queue();
+            return;
+        }
+
+        user.setXp(user.getCoins() - xp).save();
+
+
+        event.getMessage().getChannel().sendMessage("`XP von " + member.getEffectiveName() + " erfolgreich auf " + user.getXp() + " XP reduziert`").queue();
     }
 
     @Override

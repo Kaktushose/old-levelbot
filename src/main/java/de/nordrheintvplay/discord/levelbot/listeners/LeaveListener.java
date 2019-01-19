@@ -8,6 +8,6 @@ public class LeaveListener extends ListenerAdapter {
 
     @Override
     public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-        Users.removeMember(event.getUser().getId());
+        Users.getUser(event.getUser().getIdLong()).remove();
     }
 }

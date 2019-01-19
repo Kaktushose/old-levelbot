@@ -2,6 +2,7 @@ package de.nordrheintvplay.discord.levelbot.commands.mod;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
 import de.nordrheintvplay.discord.levelbot.core.XpHandler;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Permissions;
 import net.dv8tion.jda.core.entities.Member;
@@ -27,19 +28,20 @@ public class SetXp implements Commands {
         }
 
         Member member = event.getMessage().getMentionedMembers().get(0);
-        String memberId = member.getUser().getId();
-        int xp;
+       User user  = Users.getUser(member.getUser().getIdLong());
+
+       int xp;
         try {
             xp = Integer.parseInt(args[1]);
         } catch (NumberFormatException e) {
             event.getChannel().sendMessage("`" + args[1] + " ist keine gültige Zahl!").queue();
             return;
         }
-        Users.setXp(memberId, xp);
+        user.setXp(xp).save();
 
         event.getMessage().getChannel().sendMessage("`Erfolgreich XP von " + member.getEffectiveName() + " auf " + xp + " gesetzt!`").queue();
 
-        XpHandler.check(event, event.getMember().getUser().getId());
+        XpHandler.check(event, Users.getUser(event.getMember().getUser().getIdLong()));
 
     }
 

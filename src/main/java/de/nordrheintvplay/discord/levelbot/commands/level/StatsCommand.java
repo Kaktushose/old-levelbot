@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.level;
 
 import de.nordrheintvplay.discord.levelbot.commands.framework.Commands;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.LevelUtils;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -14,18 +15,21 @@ public class StatsCommand implements Commands {
 
         if (event.getMessage().getMentionedMembers().size() == 0) {
 
-            String userId = event.getAuthor().getId();
+            User user = Users.getUser(event.getAuthor().getIdLong());
+
             String items = "";
 
-            if (Users.hasBooster(userId)) {
+            
+            
+            if (user.getBooster()) {
                 items = "Münzenbooster ";
             }
 
-            if (Users.hasPremium(userId)) {
+            if (user.getPremium()) {
                 items = items + "Premium-Rang ";
             }
 
-            if (Users.hasUltra(userId)) {
+            if (user.getUltra()) {
                 items = items + "ULTRA-Rang";
             }
 
@@ -37,26 +41,26 @@ public class StatsCommand implements Commands {
                     .setAuthor(event.getAuthor().getName(), null, event.getAuthor().getAvatarUrl())
                     .setDescription("Kontoinformation")
                     .setColor(Color.green)
-                    .addField("Deine aktuellen XP", String.valueOf(Users.getXp(userId)), false)
-                    .addField("Deine aktuellen Münzen", String.valueOf(Users.getCoins(userId)), false)
-                    .addField("Deine aktuelle Stufe", LevelUtils.getRoleByLevel(Users.getRole(event.getAuthor().getId())).getName(), false)
+                    .addField("Deine aktuellen XP", String.valueOf(user.getXp()), false)
+                    .addField("Deine aktuellen Münzen", String.valueOf(user.getCoins()), false)
+                    .addField("Deine aktuelle Stufe", LevelUtils.getRoleByLevel(user.getRole()).getName(), false)
                     .addField("Deine Items", items, false)
                     .build()).queue();
         } else {
 
-            String userId = event.getMessage().getMentionedUsers().get(0).getId();
+            User user = Users.getUser(event.getMessage().getMentionedUsers().get(0).getIdLong());
 
             String items = "";
 
-            if (Users.hasBooster(userId)) {
+            if (user.getBooster()) {
                 items = "Münzenbooster ";
             }
 
-            if (Users.hasPremium(userId)) {
+            if (user.getPremium()) {
                 items = items + "Premium-Rang ";
             }
 
-            if (Users.hasUltra(userId)) {
+            if (user.getUltra()) {
                 items = items + "ULTRA-Rang";
             }
 
@@ -68,11 +72,12 @@ public class StatsCommand implements Commands {
                     .setAuthor(event.getMessage().getMentionedUsers().get(0).getName(), null, event.getMessage().getMentionedUsers().get(0).getAvatarUrl())
                     .setColor(Color.green)
                     .setDescription("Kontoinformation")
-                    .addField("Deine aktuellen XP", String.valueOf(Users.getXp(userId)), false)
-                    .addField("Deine aktuellen Münzen", String.valueOf(Users.getCoins(userId)), false)
-                    .addField("Deine aktuelle Stufe", LevelUtils.getRoleByLevel(Users.getRole(event.getMessage().getMentionedUsers().get(0).getId())).getName(), false)
+                    .addField("Deine aktuellen XP", String.valueOf(user.getXp()), false)
+                    .addField("Deine aktuellen Münzen", String.valueOf(user.getCoins()), false)
+                    .addField("Deine aktuelle Stufe", LevelUtils.getRoleByLevel(user.getRole()).getName(), false)
                     .addField("Deine Items", items, false)
                     .build()).queue();
+
         }
     }
 

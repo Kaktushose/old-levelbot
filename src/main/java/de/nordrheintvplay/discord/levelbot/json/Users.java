@@ -1,7 +1,6 @@
 package de.nordrheintvplay.discord.levelbot.json;
 
 import de.nordrheintvplay.discord.levelbot.utils.Const;
-import de.nordrheintvplay.discord.levelbot.utils.LevelUtils;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import org.json.JSONObject;
@@ -11,7 +10,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 
 public class Users {
@@ -23,29 +24,14 @@ public class Users {
         load();
     }
 
-    public static void addMember(String id) {
-        JSONObject member = new JSONObject();
-        member.put("xp", 0)
-                .put("coins", 0)
-                .put("role", 1)
-                .put("lastxp", 0)
-                .put("booster", false)
-                .put("premium", false)
-                .put("ultra", false)
-                .put("boostertime", 0);
-        json.put(id, member);
-        save();
-    }
+    public static void addKey() {
 
-
-    public static void update() {
-
-        for (Iterator<String> it = json.keys(); it.hasNext();) {
+        for (Iterator<String> it = json.keys(); it.hasNext(); ) {
 
             String key = it.next();
 
             JSONObject member = new JSONObject(json.get(key).toString());
-            member.put("boostertime", 0);
+            member.put("", 0);
             json.put(key, member);
         }
 
@@ -53,122 +39,93 @@ public class Users {
 
     }
 
-    public static void check(Guild guild) {
 
-        for (Iterator<String> it = json.keys(); it.hasNext();) {
-
-            String key = it.next();
-
-            if (guild.getMembers().stream().noneMatch(member -> member.getUser().getId().equals(key))) {
-                removeMember(key);
-            }
-
-        }
+    public static void update(Guild guild) {
 
         for (Member member : guild.getMembers()) {
 
-            if (!json.has(member.getUser().getId())) {
-                addMember(member.getUser().getId());
+            Iterator<String> keys = json.keys();
+            boolean registered = false;
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.equals(member.getUser().getId())) {
+                    registered = true;
+                }
             }
 
-            if (getRole(member.getUser().getId()) == 1) {
-                LevelUtils.addRole(member, LevelUtils.Roles.WELCOME);
+            if (!registered) {
+                Users.addUser(member.getUser().getIdLong());
             }
 
         }
 
+        Iterator<String> keys = json.keys();
+        List<String> valuesToRemove = new ArrayList<>();
+
+        while (keys.hasNext()) {
+            String key = keys.next();
+            boolean onServer = false;
+            for (Member member : guild.getMembers()) {
+                if (key.equals(member.getUser().getId())) {
+                    onServer = true;
+                }
+            }
+
+            if (!onServer) {
+                valuesToRemove.add(key);
+            }
+        }
+
+        for (String key : valuesToRemove) {
+            json.remove(key);
+        }
     }
 
-    public static void removeMember(String id) {
-        json.remove(id);
+    public static void addUser(long id) {
+        JSONObject user = new JSONObject();
+        user.put("xp", 0)
+                .put("coins", 0)
+                .put("role", 1)
+                .put("lastxp", 0)
+                .put("booster", false)
+                .put("premium", false)
+                .put("ultra", false)
+                .put("boostertime", 0);
+        json.put(String.valueOf(id), user);
         save();
     }
 
-    public static long getLastXp(String id) {
-        return Long.valueOf(new JSONObject(json.get(id).toString()).get("lastxp").toString());
+    public static User getUser(long id) {
+        JSONObject member = new JSONObject(json.get(String.valueOf(id)).toString());
+        return new User(member.getInt("role"),
+                member.getInt("xp"),
+                member.getInt("coins"),
+                id,
+                member.getLong("lastxp"),
+                member.getLong("boostertime"),
+                member.getBoolean("premium"),
+                member.getBoolean("ultra"),
+                member.getBoolean("booster")
+        );
     }
 
-    public static int getXp(String id) {
-        return (int) new JSONObject(json.get(id).toString()).get("xp");
-    }
-
-    public static int getCoins(String id) {
-        return (int) new JSONObject(json.get(id).toString()).get("coins");
-    }
-
-    public static int getRole(String id) {
-        return (int) new JSONObject(json.get(id).toString()).get("role");
-    }
-
-    public static boolean hasBooster(String id) {
-        return (boolean) new JSONObject(json.get(id).toString()).get("booster");
-    }
-
-    public static boolean hasPremium(String id) {
-        return (boolean) new JSONObject(json.get(id).toString()).get("premium");
-    }
-
-    public static boolean hasUltra(String id) {
-        return (boolean) new JSONObject(json.get(id).toString()).get("ultra");
-    }
-
-    public static long getBoosterBuyTime(String id) {
-        return (long) new JSONObject(json.get(id).toString()).get("boostertime");
-    }
-
-    public static void setLastxp(String id, long lastxp) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("lastxp", lastxp);
-        json.put(id, member);
+    static void updateUser(User user) {
+        JSONObject member = new JSONObject();
+        member.put("xp", user.getXp())
+                .put("coins", user.getCoins())
+                .put("role", user.getRole())
+                .put("lastxp", user.getLastXp())
+                .put("booster", user.getBooster())
+                .put("premium", user.getPremium())
+                .put("ultra", user.getUltra())
+                .put("boostertime", user.getBoosterTime());
+        json.put(String.valueOf(user.getId()), member);
         save();
     }
 
-    public static void setXp(String id, int xp) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("xp", xp);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setCoins(String id, int coins) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("coins", coins);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setRole(String id, int role) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("role", role);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setBooster(String id, boolean value) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("booster", value);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setPremium(String id, boolean value) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("premium", value);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setUltra(String id, boolean value) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("ultra", value);
-        json.put(id, member);
-        save();
-    }
-
-    public static void setBoosterBuyTime(String id, long time) {
-        JSONObject member = new JSONObject(json.get(id).toString());
-        member.put("boostertime", time);
-        json.put(id, member);
+    static void removeUser(User user) {
+        json.remove(String.valueOf(user.getId()));
         save();
     }
 

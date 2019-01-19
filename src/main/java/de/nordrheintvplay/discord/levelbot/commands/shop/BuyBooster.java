@@ -1,6 +1,7 @@
 package de.nordrheintvplay.discord.levelbot.commands.shop;
 
 import de.nordrheintvplay.discord.levelbot.json.Prices;
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -10,17 +11,19 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
 public class BuyBooster extends ListenerAdapter {
 
     private static long msgId, memberId;
+    private static User user;
 
     public static void execute(GuildMessageReceivedEvent event) {
 
-        memberId = event.getAuthor().getIdLong();
+        user = Users.getUser(event.getAuthor().getIdLong());
 
-        if (Users.hasBooster(event.getAuthor().getId())) {
+
+        if (user.getBooster()) {
             event.getChannel().sendMessage("`Du besitzt bereits einen Münzen-Booster!`").queue();
             return;
         }
 
-        if (Users.getCoins(event.getAuthor().getId()) < Prices.getPrice("booster")) {
+        if (user.getCoins() < Prices.getPrice("booster")) {
             event.getChannel().sendMessage("`Du hast nicht genug Münzen, um dir einen Münzen-Booster zu leisten!`").queue();
             return;
         }
@@ -62,10 +65,11 @@ public class BuyBooster extends ListenerAdapter {
         }
 
         if (event.getReactionEmote().getName().equals("\uD83D\uDC4D")) {
-            Users.setBooster(String.valueOf(memberId), true);
-            Users.setCoins(String.valueOf(memberId), Users.getCoins(String.valueOf(memberId)) - Prices.getPrice("booster"));
+            user.setBooster(true);
+            user.setCoins(user.getCoins() - Prices.getPrice("booster"));
             event.getChannel().deleteMessageById(event.getMessageIdLong()).queue();
             event.getChannel().sendMessage("`Du hast einen Münzen-Booster gekauft!`").queue();
+            user.save();
         }
 
     }

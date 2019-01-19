@@ -1,5 +1,6 @@
 package de.nordrheintvplay.discord.levelbot.core;
 
+import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
 import de.nordrheintvplay.discord.levelbot.utils.Const;
 import de.nordrheintvplay.discord.levelbot.utils.LevelUtils;
@@ -16,77 +17,79 @@ import java.util.Objects;
 
 public class XpHandler extends ListenerAdapter {
 
-    public static void check(GuildMessageReceivedEvent event, String userId) {
+    public static void check(GuildMessageReceivedEvent event, User user) {
 
-        int xp = Users.getXp(userId);
-        int level = Users.getRole(userId);
+        int xp = user.getXp();
+        int level = user.getRole();
         boolean update = false;
 
         switch (LevelUtils.getLevelByXp(xp)) {
 
             case 1: {
-                if (Users.getRole(userId) == 1) return;
-                Users.setRole(userId, 1);
+                if (user.getRole() == 1) return;
+                user.setRole(1);
                 update = true;
                 break;
             }
 
             case 2: {
-                if (Users.getRole(userId) == 2) return;
-                Users.setRole(userId, 2);
-                Users.setCoins(userId, Users.getCoins(userId) + 50);
+                if (user.getRole() == 2) return;
+                user.setRole(2);
+                user.setCoins(user.getCoins() + 50);
                 update = true;
                 break;
             }
 
             case 3: {
-                if (Users.getRole(userId) == 3) return;
-                Users.setRole(userId, 3);
-                Users.setCoins(userId, Users.getCoins(userId) + 100);
+                if (user.getRole() == 3) return;
+                user.setRole(3);
+                user.setCoins(user.getCoins() + 100);
                 update = true;
                 break;
             }
 
             case 4: {
-                if (Users.getRole(userId) == 4) return;
-                Users.setRole(userId, 4);
-                Users.setCoins(userId, Users.getCoins(userId) + 200);
+                if (user.getRole() == 4) return;
+                user.setRole(4);
+                user.setCoins(user.getCoins() + 200);
                 update = true;
                 break;
             }
 
             case 5: {
-                if (Users.getRole(userId) == 5) return;
-                Users.setRole(userId, 5);
-                Users.setCoins(userId, Users.getCoins(userId) + 500);
+                if (user.getRole() == 5) return;
+                user.setRole(5);
+                user.setCoins(user.getCoins() + 500);
                 update = true;
                 break;
             }
 
             case 6: {
-                if (Users.getRole(userId) == 6) return;
-                Users.setRole(userId, 6);
-                Users.setCoins(userId, Users.getCoins(userId) + 800);
+                if (user.getRole() == 6) return;
+                user.setRole(6);
+                user.setCoins(user.getCoins() + 800);
                 update = true;
                 break;
             }
 
             case 7: {
-                if (Users.getRole(userId) == 7) return;
-                Users.setRole(userId, 7);
-                Users.setCoins(userId, Users.getCoins(userId) + 1000);
+                if (user.getRole() == 7) return;
+                user.setRole(7);
+                user.setCoins(user.getCoins() + 1000);
                 update = true;
                 break;
             }
 
         }
 
+        user.save();
+
         if (update) {
 
-            Member m = event.getGuild().getMemberById(userId);
+            Member m = event.getGuild().getMemberById(user.getId());
 
             LevelUtils.removeRoleByLevel(level, m);
-            LevelUtils.addRoleByLevel(Users.getRole(userId), m);
+            LevelUtils.addRoleByLevel(user.getRole(), m);
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setTitle("Level Up!")
@@ -94,7 +97,7 @@ public class XpHandler extends ListenerAdapter {
                     .setColor(Color.GREEN)
                     .addField(
                             "Du bist einen Rang aufgestiegen", "dein neuer Rang ist `" +
-                                    Objects.requireNonNull(LevelUtils.getRoleByLevel(Users.getRole(userId))).getName() + "`",
+                                    Objects.requireNonNull(LevelUtils.getRoleByLevel(user.getRole())).getName() + "`",
                             false);
 
             event.getGuild().getTextChannelById(527792445874765835L).sendMessage(event.getMember().getAsMention()).queue();
@@ -110,8 +113,6 @@ public class XpHandler extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 
         Date date = new Date();
-
-        String userId = event.getAuthor().getId();
 
         if (event.getChannel().getIdLong() == 408630688523485184L) { //Rollen-Reports-Tickets
             return;
@@ -129,7 +130,9 @@ public class XpHandler extends ListenerAdapter {
             return;
         }
 
-        if (date.getTime() - Users.getLastXp(userId) < 600000L) {
+        User user = Users.getUser(event.getAuthor().getIdLong());
+
+        if (date.getTime() - user.getLastXp() < 600000L) {
             return;
         }
 
@@ -142,16 +145,18 @@ public class XpHandler extends ListenerAdapter {
 
         if (event.getMessage().getContentRaw().length() >= 10 || hasImage) {
 
-            Users.setXp(userId, Users.getXp(userId) + 5);
+            user.setXp(user.getXp() + 3);
 
-            if (Users.hasBooster(userId)) {
-                Users.setCoins(userId, Users.getCoins(userId) + LevelUtils.getCoinsByLevel(Users.getRole(userId)) + 2);
+            if (user.getBooster()) {
+                user.setCoins(user.getCoins() + LevelUtils.getCoinsByLevel(user.getRole()+ 2));
             } else {
-                Users.setCoins(userId, Users.getCoins(userId) + LevelUtils.getCoinsByLevel(Users.getRole(userId)));
+                user.setCoins(user.getCoins() + LevelUtils.getCoinsByLevel(user.getRole()));
             }
 
-            Users.setLastxp(userId, date.getTime());
-            check(event, userId);
+            user.setLastxp(date.getTime());
+            user.save();
+            check(event, user);
+            
 
         }
     }
