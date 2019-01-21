@@ -1,8 +1,8 @@
 package de.nordrheintvplay.discord.levelbot.core;
 
+import de.nordrheintvplay.discord.levelbot.json.Prices;
 import de.nordrheintvplay.discord.levelbot.json.User;
 import de.nordrheintvplay.discord.levelbot.json.Users;
-import de.nordrheintvplay.discord.levelbot.json.Prices;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 
@@ -18,11 +18,13 @@ public class BoosterCheck {
 
             User user = Users.getUser(m.getUser().getIdLong());
 
-            if (user.getBooster()) {
-                return;
+            if (!user.hasBooster()) {
+                System.out.println("noBooster for " +  m.getEffectiveName());
+                continue;
             }
-            if (date.getTime() - user.getBoosterTime() < 4838400000L) {
-                return;
+            if (date.getTime() - user.getBoosterTime() >= 4838400000L) {
+                System.out.println("Time is okay" + m.getEffectiveName());
+                continue;
             }
 
             user.setBooster( false);
@@ -32,9 +34,7 @@ public class BoosterCheck {
 
         }
 
-
     }
-
 
 }
 

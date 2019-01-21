@@ -147,7 +147,7 @@ public class XpHandler extends ListenerAdapter {
 
             user.setXp(user.getXp() + 3);
 
-            if (user.getBooster()) {
+            if (user.hasBooster()) {
                 user.setCoins(user.getCoins() + LevelUtils.getCoinsByLevel(user.getRole()+ 2));
             } else {
                 user.setCoins(user.getCoins() + LevelUtils.getCoinsByLevel(user.getRole()));

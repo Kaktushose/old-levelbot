@@ -18,7 +18,7 @@ public class BuyBooster extends ListenerAdapter {
         user = Users.getUser(event.getAuthor().getIdLong());
 
 
-        if (user.getBooster()) {
+        if (user.hasBooster()) {
             event.getChannel().sendMessage("`Du besitzt bereits einen Münzen-Booster!`").queue();
             return;
         }

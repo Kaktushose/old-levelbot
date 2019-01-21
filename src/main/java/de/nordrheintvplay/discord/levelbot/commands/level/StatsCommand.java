@@ -21,7 +21,7 @@ public class StatsCommand implements Commands {
 
             
             
-            if (user.getBooster()) {
+            if (user.hasBooster()) {
                 items = "Münzenbooster ";
             }
 
@@ -52,7 +52,7 @@ public class StatsCommand implements Commands {
 
             String items = "";
 
-            if (user.getBooster()) {
+            if (user.hasBooster()) {
                 items = "Münzenbooster ";
             }
 

@@ -116,7 +116,7 @@ public class Users {
                 .put("coins", user.getCoins())
                 .put("role", user.getRole())
                 .put("lastxp", user.getLastXp())
-                .put("booster", user.getBooster())
+                .put("booster", user.hasBooster())
                 .put("premium", user.getPremium())
                 .put("ultra", user.getUltra())
                 .put("boostertime", user.getBoosterTime());

@@ -71,7 +71,6 @@ public class LevelBot {
         Users.update(jda.getGuildById(Const.SERVER_ID));
         BoosterCheck.check(jda.getGuildById(Const.SERVER_ID));
 
-
     }
 
     public static JDA getJda() {
